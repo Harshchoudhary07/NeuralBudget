@@ -13,8 +13,8 @@ This guide will help you deploy your NeuralBudget application to **Render.com** 
 
 ## Prerequisites
 - ✅ Project uploaded to GitHub (see [GITHUB_UPLOAD_GUIDE.md](GITHUB_UPLOAD_GUIDE.md))
-- ✅ Gemini API Key: `AIzaSyD-2oOFUFTRmfPL7Yx354sb_zJzPVuJrTs`
-- ⚠️ Firebase service account key (firebase_key.json) - **You'll need to get this**
+- ✅ Gemini API Key (get from Google AI Studio)
+- ⚠️ Firebase service account key (firebase_key.json)
 
 ---
 
@@ -67,7 +67,7 @@ Click **"Add Environment Variable"** for each:
 | `SECRET_KEY` | Generate a random key [here](https://djecrety.ir/) |
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | `.render.com` |
-| `GEMINI_API_KEY` | `AIzaSyD-2oOFUFTRmfPL7Yx354sb_zJzPVuJrTs` |
+| `GEMINI_API_KEY` | Your Gemini API Key (from Google AI Studio) |
 | `FIREBASE_API_KEY` | Your Firebase API Key (get from Firebase Console) |
 | `ENVIRONMENT` | `production` |
 | `PYTHON_VERSION` | `3.10.0` |
