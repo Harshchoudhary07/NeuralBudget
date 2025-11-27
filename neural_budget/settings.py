@@ -148,4 +148,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS_ALLOW_CREDENTIALS = True
 GOOGLE_APPLICATION_CREDENTIALS="/firebase_auth_key.json"
 
-GEMINI_API_KEY = config('GEMINI_API_KEY')
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
