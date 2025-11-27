@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
 import json
-from apps.ml_features.services.chatbot_service import get_chatbot_response
+from apps.ml_features.services.chatbot_service_simple import get_chatbot_response
 
 # Import AI functions
 from AI.categorization.run_ocr import get_ocr_text
