@@ -10,7 +10,7 @@ from google.api_core.exceptions import GoogleAPIError
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from google.protobuf.timestamp_pb2 import Timestamp
@@ -27,9 +27,7 @@ from apps.common_utils.firebase_config import db  # Assumes same Firestore confi
 # --- CONFIGURATION ---
 load_dotenv()
 
-LLM_REPO_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Primary model (aligned with chatbot)
-FALLBACK_LLM_REPO_ID = "HuggingFaceH4/zephyr-7b-beta"  # Fallback model
-HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
+LLM_MODEL_NAME = "gemini-1.5-flash"
 
 # --- INIT SERVICES ---
 print("Initializing AI services for expense analysis...")
@@ -44,32 +42,19 @@ except GoogleAPIError as e:
     sys.exit(1)
 
 try:
-    llm_endpoint = HuggingFaceEndpoint(
-        repo_id=LLM_REPO_ID,
-        huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
-        max_new_tokens=300,
+    if not os.getenv("GEMINI_API_KEY"):
+        raise ValueError("GEMINI_API_KEY not found")
+        
+    llm = ChatGoogleGenerativeAI(
+        model=LLM_MODEL_NAME,
         temperature=0.7,
-        timeout=60,
+        max_output_tokens=512,
+        timeout=60
     )
-    llm = ChatHuggingFace(llm=llm_endpoint)
-    print("✅ LLM initialized with ChatHuggingFace (Mixtral).")
+    print(f"✅ LLM initialized (Gemini 1.5 Flash).")
 except Exception as e:
-    print(f"❌ Error initializing Mixtral LLM: {e}")
-    print("Attempting fallback to zephyr-7b-beta...")
-    try:
-        llm_endpoint = HuggingFaceEndpoint(
-            repo_id=FALLBACK_LLM_REPO_ID,
-            huggingfacehub_api_token=HUGGINGFACEHUB_API_TOKEN,
-            max_new_tokens=300,
-            temperature=0.7,
-            timeout=60,
-        )
-        llm = ChatHuggingFace(llm=llm_endpoint)
-        print("✅ LLM initialized with ChatHuggingFace (Fallback).")
-    except Exception as e:
-        print(f"❌ Error initializing fallback LLM: {e}")
-        print("Ensure your HUGGINGFACEHUB_API_TOKEN is set and the model is available.")
-        sys.exit(1)
+    print(f"❌ Error initializing Gemini LLM: {e}")
+    sys.exit(1)
 
 print("Services initialized.")
 

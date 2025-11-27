@@ -10,8 +10,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint, ChatHuggingFace
-from langchain_chroma import Chroma
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain_community.vectorstores import FAISS
 
 # Suppress FutureWarning for cleaner output
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -25,72 +25,73 @@ from apps.common_utils.firebase_config import db
 # --- CONFIGURATION ---
 load_dotenv()
 
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-LLM_REPO_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-FALLBACK_LLM_REPO_ID = "HuggingFaceH4/zephyr-7b-beta"
+# Use Gemini models
+EMBEDDING_MODEL_NAME = "models/embedding-001"
+LLM_MODEL_NAME = "gemini-1.5-flash"
 VECTOR_COLLECTION_NAME = "user_transaction_vectors"
-CHROMA_PERSIST_DIR = "./chroma_db"
+FAISS_INDEX_PATH = "faiss_index"
 
 # --- INIT SERVICES ---
 print("Initializing AI services...")
 
 try:
-    embedding_service = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
-    print("✅ Embedding service initialized.")
+    # Initialize Gemini Embeddings
+    if not os.getenv("GEMINI_API_KEY"):
+        raise ValueError("GEMINI_API_KEY not found in environment variables")
+        
+    embedding_service = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL_NAME)
+    print("✅ Embedding service initialized (Gemini).")
 except Exception as e:
     print(f"❌ Error initializing embedding service: {e}")
     sys.exit(1)
 
 try:
-    llm_endpoint = HuggingFaceEndpoint(
-        repo_id=LLM_REPO_ID,
-        huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
-        max_new_tokens=128,
+    # Initialize Gemini LLM
+    llm = ChatGoogleGenerativeAI(
+        model=LLM_MODEL_NAME,
         temperature=0.1,
-        timeout=60,
+        max_output_tokens=512,
+        timeout=60
     )
-    llm = ChatHuggingFace(llm=llm_endpoint)
-    print("✅ LLM initialized with ChatHuggingFace (Mixtral).")
+    print("✅ LLM initialized (Gemini 1.5 Flash).")
 except Exception as e:
-    print(f"❌ Error initializing Mixtral LLM: {e}")
-    print("Attempting fallback to zephyr-7b-beta...")
-    try:
-        llm_endpoint = HuggingFaceEndpoint(
-            repo_id=FALLBACK_LLM_REPO_ID,
-            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
-            max_new_tokens=128,
-            temperature=0.1,
-            timeout=60,
-        )
-        llm = ChatHuggingFace(llm=llm_endpoint)
-        print("✅ LLM initialized with ChatHuggingFace.")
-    except Exception as e:
-        print(f"❌ Error initializing fallback LLM: {e}")
-        print("Ensure your HUGGINGFACEHUB_API_TOKEN is set and the model is available.")
-        sys.exit(1)
+    print(f"❌ Error initializing Gemini LLM: {e}")
+    sys.exit(1)
 
+# Initialize Vector Store (FAISS)
+vector_store = None
 try:
     print("Testing Firestore connection...")
     test_doc = db.collection("test").document("connection_test").set({"test": "ok"})
     print("✅ Firestore connection test successful.")
-    vector_store = Chroma(
-        collection_name=VECTOR_COLLECTION_NAME,
-        embedding_function=embedding_service,
-        persist_directory=CHROMA_PERSIST_DIR
-    )
-    print(f"✅ Vector store initialized in '{VECTOR_COLLECTION_NAME}' collection.")
+    
+    # Try to load existing index if it exists
+    if os.path.exists(FAISS_INDEX_PATH):
+        try:
+            vector_store = FAISS.load_local(FAISS_INDEX_PATH, embedding_service, allow_dangerous_deserialization=True)
+            print("✅ Loaded existing FAISS index.")
+        except Exception as e:
+            print(f"⚠️ Could not load existing index: {e}. Creating new one.")
+            
+    if vector_store is None:
+        # Create a dummy index to initialize if loading failed or didn't exist
+        # FAISS requires at least one text to initialize
+        vector_store = FAISS.from_texts(["initialization"], embedding_service)
+        print(f"✅ Created new FAISS vector store.")
+        
 except GoogleAPIError as e:
     print(f"❌ Firestore error: {e}")
     print("Check your Firebase service account key (firebase_key.json) and permissions.")
     sys.exit(1)
 except Exception as e:
-    print(f"❌ Error initializing Chroma vector store: {e}")
+    print(f"❌ Error initializing FAISS vector store: {e}")
     sys.exit(1)
 
 print("Services initialized.")
 
 # --- INDEXING ---
 def index_user_transactions(user_id: str, force_reindex=False):
+    global vector_store
     print(f"Starting indexing for user: {user_id} (force_reindex={force_reindex})...")
     try:
         queries_to_try = [
@@ -175,13 +176,17 @@ def index_user_transactions(user_id: str, force_reindex=False):
             print(f"❌ Error generating test embedding: {e}")
             return False
 
-        print(f"Adding {len(documents_to_index)} document(s) to '{VECTOR_COLLECTION_NAME}'...")
+        print(f"Adding {len(documents_to_index)} document(s) to FAISS index...")
+        
+        # Add documents to FAISS
         vector_store.add_documents(documents=documents_to_index)
+        
+        # Save FAISS index locally
         try:
-            if hasattr(vector_store, "persist"):
-                vector_store.persist()
-        except Exception:
-            pass
+            vector_store.save_local(FAISS_INDEX_PATH)
+            print(f"✅ FAISS index saved to {FAISS_INDEX_PATH}")
+        except Exception as e:
+            print(f"⚠️ Warning: Could not save FAISS index: {e}")
 
         print(f"✅ Indexing complete for user: {user_id}")
         return True
@@ -256,10 +261,7 @@ if __name__ == '__main__':
                 print(f"A: {response}\n")
             except ReadTimeout as e:
                 print(f"❌ ReadTimeoutError processing question: {e}")
-                print(f"Check your network connection or increase the timeout in HuggingFaceEndpoint.")
             except Exception as e:
                 print(f"❌ Error processing question: {e}")
-                print(f"Check if LLM is accessible with your API token.")
-                print(f"Using fallback LLM: {FALLBACK_LLM_REPO_ID}.")
     else:
         print("❌ Failed to create RAG chain. Cannot process questions.")
