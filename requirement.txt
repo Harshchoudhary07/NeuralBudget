@@ -18,7 +18,7 @@ langchain-core==0.3.28
 langchain-google-firestore==0.3.0
 chromadb==0.5.23
 sentence-transformers==3.3.1
-huggingface-hub==0.26.5
+huggingface-hub==0.33.5
 django-cors-headers==4.3.0
 Pillow==10.0.0
 gunicorn==21.2.0
