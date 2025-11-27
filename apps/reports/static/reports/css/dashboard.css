@@ -1,0 +1,138 @@
+/*=============================================
+  DASHBOARD-SPECIFIC STYLES
+=============================================*/
+
+.dashboard {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  align-items: flex-start;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard-left {
+  display: flex;
+  flex-direction: column;
+  width: 65%;
+  gap: 20px;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+/*----------- CARD COMPONENT ---------------*/
+.card {
+  flex: 1;
+  min-width: 200px;
+  background: rgb(255 249 244);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.card p {
+  font-size: 22px;
+  font-weight: bold;
+  color: rgb(36 167 145);
+}
+
+/*----------- RECENT TRANSACTIONS COMPONENT ---------------*/
+.recent-transactions {
+  background: rgb(255 249 244);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recent-transactions h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: rgb(36 167 145);
+}
+
+.recent-transactions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-transactions li {
+  padding: 12px 0;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+}
+
+.recent-transactions li:last-child {
+  border-bottom: none;
+}
+
+.txn-name { font-weight: bold; flex: 2; }
+.txn-amount { flex: 1; text-align: center; color: #2a2a72; font-weight: bold; }
+.txn-type { flex: 1; text-align: right; font-style: italic; color: #777; }
+
+/*----------- CHART COMPONENT ---------------*/
+.chart-section {
+  width: 35%;
+  max-width: 400px;
+}
+
+#expenseChart {
+  width: 100% !important;
+  height: auto !important;
+}
+
+/*----------- DARK MODE FOR DASHBOARD ---------------*/
+.dark-mode .card,
+.dark-mode .recent-transactions {
+  background: #1f1e1e;
+  box-shadow: 2px 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .card h3, .dark-mode .recent-transactions h3, .dark-mode .chart-section h3 {
+  color: white;
+}
+
+.dark-mode .card p, .dark-mode .txn-amount {
+  color: #2af5a1;
+}
+
+.dark-mode .txn-type {
+  color: #bbb;
+}
+
+/*----------- RESPONSIVE FOR DASHBOARD ---------------*/
+@media screen and (max-width: 1200px) {
+  .dashboard {
+    flex-direction: column;
+    align-items: center;
+  }
+  .dashboard-left, .chart-section {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .dashboard-cards {
+    flex-direction: column;
+  }
+}

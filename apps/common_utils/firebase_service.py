@@ -1,0 +1,170 @@
+from google.cloud.firestore_v1.base_query import FieldFilter
+from apps.common_utils.firebase_config import db
+from firebase_admin import auth, exceptions as firebase_exceptions, firestore
+import requests
+from apps.common_utils.firebase_config import FIREBASE_API_KEY
+from django.conf import settings
+import os
+
+FIREBASE_SIGN_IN_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+DEFAULT_PROFILE_PIC_URL = os.path.join(settings.MEDIA_URL, 'profile_photos', 'default_profile.jpg') # Assuming .jpeg
+
+def get_user_categories(user_id):
+    """Fetch categories for a specific user from the single document storage."""
+    user_categories_doc_ref = db.collection("user_categories").document(user_id)
+    doc = user_categories_doc_ref.get()
+
+    if doc.exists:
+        categories_data = doc.to_dict()
+        categories = categories_data.get('categories', [])
+        return categories
+    else:
+        return []
+
+def delete_user_categories(user_id):
+    """Delete all categories for a specific user."""
+    categories_ref = db.collection("categories").where(filter=FieldFilter("userId", "==", user_id))
+    docs = categories_ref.stream()
+    print("Categories to be deleted:", [doc.to_dict() for doc in docs])  # Debugging line
+    for doc in docs:
+        doc.reference.delete()
+    
+
+def copy_default_categories_to_user(user_id):
+    """Copies default categories to a new user, storing them in a single document."""
+    default_categories_ref = db.collection('default_categories').stream()
+    default_category_names = []
+    for category in default_categories_ref:
+        default_category_names.append(category.to_dict()['name'])
+
+    # Store all categories in a single document for the user
+    user_categories_doc_ref = db.collection('user_categories').document(user_id)
+    user_categories_doc_ref.set({
+        'categories': default_category_names,
+        'userId': user_id # Keep userId for potential future queries
+    })
+
+def add_category(user_id, category_name):
+    """Adds a new category for a user."""
+    db.collection('categories').add({
+        'name': category_name,
+        'userId': user_id
+    })
+
+def add_transaction(user_id, transaction_data,collection):
+    """Add a transaction to Firestore."""
+    # print(typ)
+    transactions_ref = db.collection(collection)
+    transactions_ref.add({
+        "userId": user_id,
+        **transaction_data
+    })
+
+def set_document(collection_name, doc_id, data):
+    """
+    Sets (creates or updates) a document in a specified collection with a given ID.
+    """
+    doc_ref = db.collection(collection_name).document(doc_id)
+    doc_ref.set(data)
+
+def create_user_profile(uid, email, display_name, first_name=None, last_name=None, phone_number=None):
+    """Creates an initial user profile document in Firestore."""
+    user_profile_ref = db.collection('user_profiles').document(uid)
+    profile_data = {
+        'email': email,
+        'display_name': display_name,
+        'created_at': firestore.SERVER_TIMESTAMP,
+        'photo_url': DEFAULT_PROFILE_PIC_URL # Set default profile picture
+    }
+    if first_name: profile_data['first_name'] = first_name
+    if last_name: profile_data['last_name'] = last_name
+    if phone_number: profile_data['phone_number'] = phone_number
+
+    user_profile_ref.set(profile_data)
+
+def get_user_profile(uid):
+    """Retrieves a user profile document from Firestore."""
+    user_profile_ref = db.collection('user_profiles').document(uid)
+    doc = user_profile_ref.get()
+    if doc.exists:
+        profile_data = doc.to_dict()
+        # Ensure photo_url exists, default if not
+        if 'photo_url' not in profile_data or not profile_data['photo_url']:
+            profile_data['photo_url'] = DEFAULT_PROFILE_PIC_URL
+        return profile_data
+    return None
+
+def update_user_profile(uid, data):
+    """Updates a user profile document in Firestore."""
+    user_profile_ref = db.collection('user_profiles').document(uid)
+    user_profile_ref.update(data)
+
+def update_user_profile_picture(uid, photo_url):
+    """Updates only the profile picture URL in a user's profile."""
+    user_profile_ref = db.collection('user_profiles').document(uid)
+    user_profile_ref.update({'photo_url': photo_url})
+
+def get_transactions(user_id,collection):
+    try:
+        transactions_ref = db.collection(collection)
+    except Exception as e:
+        print(e)
+        return []
+    query = transactions_ref.where(filter=FieldFilter("userId", "==", user_id))
+    
+    query = query.get()
+    
+    transactions = []
+    for doc in query:
+        transaction = doc.to_dict()
+        transaction["id"] = doc.id
+        transactions.append(transaction)
+    return transactions
+
+def add_category(category_name):
+    """Add a category to Firestore."""
+    categories_ref = db.collection("categories")
+    categories_ref.add({
+        "name": category_name
+    })
+
+def delete_transaction(transaction_id, collection, user_id):
+    """
+    Delete a transaction from Firestore.
+    
+    Note: user_id is included for future security checks to ensure
+    the user owns the transaction they are trying to delete.
+    """
+    # TODO: Add a security rule or check to verify user_id owns the transaction_id
+    db.collection(collection).document(transaction_id).delete()
+    print(f"Deleted transaction {transaction_id} from {collection}")
+
+def firebase_login(email, password):
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
+    params = {"key": FIREBASE_API_KEY}
+    try:
+        response = requests.post(FIREBASE_SIGN_IN_URL, json=payload, params=params, headers=headers)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        error_json = e.response.json()
+        error_message = error_json.get('error', {}).get('message', 'An unknown error occurred')
+        # Map Firebase error messages to more user-friendly ones
+        if error_message:
+            raise ValueError(f"{error_message}")
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"Network error or invalid request: {str(e)}")
+
+def verify_firebase_token(id_token):
+    try:
+        decoded_token = auth.verify_id_token(id_token, clock_skew_seconds=30)
+        return decoded_token
+    except firebase_exceptions.FirebaseError as e:
+        raise e

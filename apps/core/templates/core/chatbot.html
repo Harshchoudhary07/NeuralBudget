@@ -1,0 +1,150 @@
+<div id="chatbot-container">
+    <div id="chatbot-icon" onclick="toggleChatbot()">
+        <i class="uil uil-comment-alt-dots"></i>
+    </div>
+
+    <div id="chatbot-popup">
+        <div id="chatbot-header">
+            <h3>AI Financial Assistant</h3>
+            <span class="close-btn" onclick="toggleChatbot()">✖</span>
+        </div>
+        <div id="chatbot-messages"></div>
+        <form id="chatbot-form" onsubmit="sendMessage(event)">
+            {% csrf_token %}
+            <input type="text" id="chatbot-input" placeholder="Ask about finance..." required autocomplete="off">
+            <button type="submit">
+                <i class="uil uil-message"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+    function toggleChatbot() {
+    const popup = document.getElementById("chatbot-popup");
+    const isVisible = popup.style.display === "flex";
+    popup.style.display = isVisible ? "none" : "flex";
+    
+    if (!isVisible) {
+        document.getElementById("chatbot-input").focus();
+    }
+}
+
+function appendMessage(text, className, isWelcome = false, isError = false) {
+    const messagesContainer = document.getElementById("chatbot-messages");
+    const messageDiv = document.createElement("div");
+    messageDiv.className = className;
+    
+    // Add special classes for styling
+    if (isWelcome) {
+        messageDiv.classList.add("welcome-message");
+    }
+    if (isError) {
+        messageDiv.classList.add("error-message");
+    }
+    
+    messageDiv.textContent = text;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    return messageDiv;
+}
+
+async function sendMessage(e) {
+    e.preventDefault();
+
+    const input = document.getElementById("chatbot-input");
+    const form = document.getElementById("chatbot-form");
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const userMessage = input.value.trim();
+
+    if (!userMessage) return;
+
+    // Get API URL
+    const container = document.getElementById("chatbot-container").closest("#chatbot-component");
+    if (!container) {
+        console.error("Chatbot parent component not found.");
+        appendMessage("Error: Chatbot is misconfigured.", "bot-msg", false, true);
+        return;
+    }
+
+    const apiUrl = container.dataset.apiUrl;
+    if (!apiUrl) {
+        console.error("API URL not found.");
+        appendMessage("Error: No API URL configured.", "bot-msg", false, true);
+        return;
+    }
+
+    // Display user message
+    appendMessage(userMessage, "user-msg");
+    
+    // Clear input and disable form
+    input.value = "";
+    input.disabled = true;
+    submitBtn.disabled = true;
+    submitBtn.classList.add("sending");
+    
+    // Show thinking message
+    const thinkingMsg = appendMessage("Thinking...", "bot-msg thinking");
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": form.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({ message: userMessage })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `HTTP error! Status: ${response.status}`;
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        
+        // Replace thinking message with response
+        thinkingMsg.textContent = data.response || "Sorry, I received an empty response.";
+        thinkingMsg.classList.remove("thinking");
+
+    } catch (error) {
+        console.error("Error:", error);
+        thinkingMsg.textContent = `Error: ${error.message}`;
+        thinkingMsg.classList.remove("thinking");
+        thinkingMsg.classList.add("error-message");
+    } finally {
+        // Re-enable form
+        input.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("sending");
+        input.focus();
+        
+        // Scroll to bottom
+        const messagesContainer = document.getElementById("chatbot-messages");
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+// Initialize with welcome message
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById("chatbot-messages");
+    if (messagesContainer && messagesContainer.children.length === 0) {
+        appendMessage("Hello! I'm your AI Financial Assistant. How can I help you today?", "bot-msg", true);
+    }
+});
+
+// Close chatbot with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const popup = document.getElementById("chatbot-popup");
+        if (popup.style.display === "flex") {
+            toggleChatbot();
+        }
+    }
+});
+
+
+</script>

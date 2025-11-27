@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Transaction History{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'transactions/css/transaction_history.css' %}" />
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="{% static 'transactions/js/transaction_history.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<section class="track-income">
+    <h2>Transaction History</h2>
+
+    <div class="table-toolbar">
+        <div class="filter-group">
+            <label for="sort-by">Sort By:</label>
+            <select id="sort-by">
+                <option value="date">Date</option>
+                <option value="amount">Amount</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="sort-order">Order:</label>
+            <select id="sort-order">
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="category-filter">Category:</label>
+            <select id="category-filter">
+                <option value="all">All</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <table class="incomeTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Type</th>
+                <th>Delete</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button id="LoadMore">Load More +5 ..</button>
+</section>
+{% endblock %}

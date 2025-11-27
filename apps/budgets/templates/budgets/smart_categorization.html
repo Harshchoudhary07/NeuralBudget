@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Smart Saver - Neural Budget AI{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'budgets/css/smart_categorization.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    <script type="module" src="{% static 'budgets/js/smart_categorization.js' %}"></script>
+{% endblock %}``````
+
+{% block content %}
+<section class="smart-categorization-page">
+    <div class="page-header">
+        <h1>AI Smart Categorization ✨</h1>
+        <p>Let SAVI analyze your expenses and automatically group them into clear categories. Get a visual breakdown of where your money really goes.</p>
+    </div>
+
+    <div class="analysis-controls">
+        <button id="analyze-btn" class="btn-analyze">
+            <i class="fas fa-magic"></i> Analyze My Expenses
+        </button>
+    </div>
+
+    <div id="loading-spinner" class="spinner-container" style="display: none;">
+        <div class="spinner"></div>
+        <p>SAVI is analyzing your transactions...</p>
+    </div>
+
+    <div id="results-container" class="results-container"></div>
+</section>
+{% endblock %}

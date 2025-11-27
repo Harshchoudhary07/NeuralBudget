@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | Neural Budget AI{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'reports/css/dashboard.css' %}"/>
+{% endblock %}
+
+{% block content %}
+        <section class="dashboard">
+          <div class="dashboard-left">
+            <div class="dashboard-cards">
+              <div class="card">
+                <h3>Total Expenses</h3>
+                <p id="totalExpenses">₹{{ total_expenses|floatformat:2 }}</p>
+              </div>
+              <div class="card">
+                <h3>Total Income</h3>
+                <p id="totalIncome">₹{{ total_income|floatformat:2 }}</p>
+              </div>
+              <div class="card">
+                <h3>Savings</h3>
+                <p id="savings">₹{{ savings|floatformat:2 }}</p>
+              </div>
+              
+            </div>
+
+            <div class="recent-transactions">
+              <h3>Recent Transactions</h3>
+              <ul id="transactionList">
+                {% for transaction in recent_transactions %}
+                <li>
+                  <span class="txn-name">{{ transaction.name }}:</span>
+                  <span class="txn-amount"
+                    >₹{{ transaction.amount|floatformat:2 }}</span
+                  >
+                  <span class="txn-type">{{ transaction.type }}</span>
+                </li>
+                {% empty %}
+                <li>No recent transactions</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{% static 'reports/js/dashboard.js' %}"></script>
+
+{% endblock %}

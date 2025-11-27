@@ -1,0 +1,72 @@
+/* in apps/datagen/static/datagen/css/delete_data.css */
+
+.delete-data-page {
+    max-width: 600px;
+    margin: 0 auto; /* Centers the content on the page */
+}
+
+.card-style {
+    background: #fff; 
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+}
+
+.tool-header { 
+    text-align: center; 
+    margin-bottom: 2rem; 
+}
+
+.tool-header h1 { 
+    font-size: 24px; 
+    color: #c0392b; /* A strong red for warning */
+}
+
+.tool-header .warning-icon { 
+    margin-right: 10px; 
+}
+
+.tool-header p { 
+    color: #555; 
+    line-height: 1.6; 
+    font-size: 15px;
+}
+
+.btn-delete {
+    width: 100%; 
+    padding: 15px; 
+    font-size: 16px;
+    font-weight: 700; 
+    background-color: #e74c3c;
+    color: white; 
+    border: none; 
+    border-radius: 10px; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete:hover { 
+    background-color: #c0392b; 
+}
+
+.btn-delete:disabled { 
+    background-color: #ccc; 
+    cursor: not-allowed; 
+}
+
+.status-message {
+    margin-top: 1.5rem; 
+    padding: 15px;
+    border-radius: 8px; 
+    text-align: center; 
+    font-weight: 600;
+}
+
+.status-message.success { 
+    background-color: #eaf8ee; 
+    color: #28a745; 
+}
+.status-message.error { 
+    background-color: #fdecea; 
+    color: #dc3545; 
+}

@@ -1,0 +1,704 @@
+/* apps/transactions/static/transactions/css/add_transaction.css */
+
+/* --- 1. Main Layout & Container --- */
+.add-expense-section {
+    max-width: 600px;
+    padding: 40px;
+    background-color: var(--light-bg);
+    box-shadow: var(--shadow-light);
+    border-radius: 16px;
+    border: 1px solid var(--light-border);
+    margin: 20px auto;
+    transition: background-color var(--transition-standard), 
+                border-color var(--transition-standard),
+                box-shadow var(--transition-standard);
+}
+
+/* --- 2. Header and Title --- */
+.add-expense-section h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--theme-secondary);
+    transition: color var(--transition-standard);
+}
+
+/* --- 3. Transaction Type Toggle (Expense/Income) --- */
+.transaction-type-toggle {
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 25px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    transition: all var(--transition-standard);
+}
+
+.transaction-type-toggle button {
+    flex: 1;
+    padding: 14px 24px;
+    border: none;
+    background-color: transparent;
+    color: var(--light-text-secondary);
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all var(--transition-standard);
+    position: relative;
+    overflow: hidden;
+}
+
+.transaction-type-toggle button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.transaction-type-toggle button:hover::before {
+    left: 100%;
+}
+
+.transaction-type-toggle button:hover {
+    color: var(--theme-primary);
+    transform: translateY(-1px);
+}
+
+/* Expense button styling */
+.transaction-type-toggle button#expenseBtn.active {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
+}
+
+.transaction-type-toggle button#expenseBtn:hover:not(.active) {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Income button styling */
+.transaction-type-toggle button#incomeBtn.active {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    transform: translateY(-2px);
+}
+
+.transaction-type-toggle button#incomeBtn:hover:not(.active) {
+    color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+/* --- 4. Entry Method Toggle (Manual/OCR) --- */
+.entry-toggle {
+    display: flex;
+    justify-content: center;
+    background-color: var(--light-border);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 30px;
+    transition: background-color var(--transition-standard);
+}
+
+.entry-toggle button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background-color: transparent;
+    color: var(--light-text-secondary);
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all var(--transition-standard);
+}
+
+.entry-toggle button:hover {
+    color: var(--theme-primary);
+}
+
+.entry-toggle button.active {
+    background-color: var(--light-surface);
+    color: var(--theme-primary);
+    box-shadow: 0 2px 10px rgba(36, 167, 145, 0.15);
+}
+
+/* --- 5. Form Fields & Inputs --- */
+.entry-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.entry-form label {
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 8px;
+    font-weight: 600;
+    color: var(--light-text);
+    font-size: 15px;
+    transition: color var(--transition-standard);
+}
+
+.entry-form input,
+.entry-form select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--light-border);
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: var(--light-surface);
+    color: var(--light-text);
+    box-sizing: border-box;
+    transition: border-color var(--transition-standard), 
+                box-shadow var(--transition-standard);
+}
+
+.entry-form input:focus,
+.entry-form select:focus {
+    outline: none;
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 3px rgba(36, 167, 145, 0.1);
+}
+
+.entry-form input:hover,
+.entry-form select:hover {
+    border-color: var(--theme-primary);
+}
+
+/* --- 6. "Other Category" Section --- */
+#other-category-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background-color: var(--light-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--light-border);
+    transition: background-color var(--transition-standard), 
+                border-color var(--transition-standard);
+}
+
+#other-category-container label {
+    margin-bottom: 0;
+    white-space: nowrap;
+    color: var(--light-text);
+    font-weight: 500;
+}
+
+#other-category-container input {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+#add-category-btn {
+    padding: 12px 15px;
+    background-color: var(--button-secondary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all var(--transition-standard);
+    white-space: nowrap;
+}
+
+#add-category-btn:hover {
+    background-color: var(--button-secondary-hover);
+}
+
+/* --- 7. Submit Buttons --- */
+.entry-form button[type="submit"] {
+    background-color: var(--theme-primary);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    width: 100%;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color var(--transition-standard);
+}
+
+.entry-form button[type="submit"]:hover {
+    background-color: #2a9e80;
+}
+
+.entry-form button[type="submit"]:active {
+    background-color: #238a6f;
+}
+
+/* --- 8. Success/Error States --- */
+.form-field-success input,
+.form-field-success select {
+    border-color: var(--accent-green);
+    background-color: rgba(42, 245, 161, 0.05);
+}
+
+.form-field-error input,
+.form-field-error select {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.form-message {
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    transition: all var(--transition-standard);
+}
+
+.form-message.success {
+    background-color: rgba(42, 245, 161, 0.1);
+    border: 1px solid var(--accent-green);
+    color: #155724;
+}
+
+.form-message.error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+/* --- 9. Loading States --- */
+.entry-form.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.entry-form.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--light-border);
+    border-top: 3px solid var(--theme-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* --- 10. Dark Mode Support --- */
+.dark-mode .add-expense-section {
+    background: var(--dark-bg);
+    border-color: var(--dark-border);
+    box-shadow: var(--shadow-dark);
+}
+
+.dark-mode .add-expense-section h2,
+.dark-mode .entry-form label {
+    color: var(--dark-text);
+}
+
+/* Dark mode transaction type toggle */
+.dark-mode .transaction-type-toggle {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .transaction-type-toggle button {
+    color: var(--dark-text-secondary);
+}
+
+.dark-mode .transaction-type-toggle button:hover:not(.active) {
+    color: var(--accent-green);
+}
+
+.dark-mode .transaction-type-toggle button#expenseBtn.active {
+    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+    box-shadow: 0 4px 15px rgba(229, 62, 62, 0.4);
+}
+
+.dark-mode .transaction-type-toggle button#incomeBtn.active {
+    background: linear-gradient(135deg, var(--accent-green) 0%, #38b2ac 100%);
+    box-shadow: 0 4px 15px rgba(42, 245, 161, 0.4);
+}
+
+.dark-mode .transaction-type-toggle button#expenseBtn:hover:not(.active) {
+    color: #e53e3e;
+    background-color: rgba(229, 62, 62, 0.15);
+}
+
+.dark-mode .transaction-type-toggle button#incomeBtn:hover:not(.active) {
+    color: var(--accent-green);
+    background-color: rgba(42, 245, 161, 0.15);
+}
+
+.dark-mode .entry-toggle {
+    background-color: var(--dark-border);
+}
+
+.dark-mode .entry-toggle button {
+    color: var(--dark-text-secondary);
+}
+
+.dark-mode .entry-toggle button:hover {
+    color: var(--accent-green);
+}
+
+.dark-mode .entry-toggle button.active {
+    background-color: var(--dark-surface);
+    color: var(--accent-green);
+    box-shadow: 0 2px 10px rgba(42, 245, 161, 0.2);
+}
+
+.dark-mode .entry-form input,
+.dark-mode .entry-form select {
+    background-color: var(--dark-surface);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+}
+
+.dark-mode .entry-form input:focus,
+.dark-mode .entry-form select:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px rgba(42, 245, 161, 0.1);
+}
+
+.dark-mode .entry-form input:hover,
+.dark-mode .entry-form select:hover {
+    border-color: var(--accent-green);
+}
+
+.dark-mode #other-category-container {
+    background-color: var(--dark-surface);
+    border-color: var(--dark-border);
+}
+
+.dark-mode #other-category-container label {
+    color: var(--dark-text);
+}
+
+.dark-mode #add-category-btn {
+    background-color: var(--accent-green);
+    color: var(--dark-bg);
+}
+
+.dark-mode #add-category-btn:hover {
+    background-color: #1dd882;
+}
+
+.dark-mode .entry-form button[type="submit"]:hover {
+    background-color: #1dd882;
+}
+
+.dark-mode .form-message.success {
+    background-color: rgba(42, 245, 161, 0.15);
+    color: var(--accent-green);
+}
+
+.dark-mode .form-message.error {
+    background-color: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
+}
+
+/* --- 11. Responsive Adjustments --- */
+@media screen and (max-width: 768px) {
+    .add-expense-section {
+        margin: 15px;
+        padding: 25px 20px;
+        border-radius: 12px;
+    }
+    
+    .add-expense-section h2 {
+        font-size: 22px;
+        margin-bottom: 25px;
+    }
+    
+    .transaction-type-toggle {
+        margin-bottom: 20px;
+    }
+    
+    .transaction-type-toggle button {
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+    
+    .entry-toggle {
+        margin-bottom: 25px;
+    }
+    
+    .entry-toggle button {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    
+    .entry-form {
+        gap: 15px;
+    }
+    
+    .entry-form input,
+    .entry-form select {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+    
+    #other-category-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    #add-category-btn {
+        padding: 10px 15px;
+    }
+    
+    .entry-form button[type="submit"] {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .add-expense-section {
+        margin: 10px;
+        padding: 20px 15px;
+    }
+    
+    .add-expense-section h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .transaction-type-toggle button {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    
+    .entry-toggle button {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .entry-form label {
+        font-size: 14px;
+    }
+    
+    .entry-form input,
+    .entry-form select {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
+
+/* --- 12. Utility Classes --- */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-field {
+    flex: 1;
+}
+
+.form-field-half {
+    flex: 0 0 48%;
+}
+
+.form-field-third {
+    flex: 0 0 32%;
+}
+
+@media screen and (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-field-half,
+    .form-field-third {
+        flex: 1;
+    }
+}
+
+/* --- 13. OCR Preview Modal --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: var(--light-bg);
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid var(--light-border);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow-medium);
+    position: relative;
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--theme-secondary);
+    font-size: 22px;
+    text-align: center;
+}
+
+.modal-content p {
+    text-align: center;
+    color: var(--light-text-secondary);
+    margin-bottom: 25px;
+    font-size: 15px;
+}
+
+/* Re-use entry form styles for modal form */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-content label {
+    font-weight: 600;
+    color: var(--light-text);
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.modal-content input,
+.modal-content select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--light-border);
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: var(--light-surface);
+    color: var(--light-text);
+    transition: all var(--transition-standard);
+    box-sizing: border-box;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 3px rgba(36, 167, 145, 0.1);
+    outline: none;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-standard);
+}
+
+#cancelPreviewBtn {
+    background-color: var(--light-border);
+    color: var(--light-text);
+}
+
+#cancelPreviewBtn:hover {
+    background-color: #d1d5db;
+}
+
+#confirmTransactionBtn {
+    background-color: var(--theme-primary);
+    color: white;
+}
+
+#confirmTransactionBtn:hover {
+    background-color: #2a9e80;
+}
+
+/* Dark Mode for Modal */
+.dark-mode .modal-content {
+    background-color: var(--dark-bg);
+    border-color: var(--dark-border);
+    box-shadow: var(--shadow-dark);
+}
+
+.dark-mode .modal-content h3 {
+    color: var(--dark-text);
+}
+
+.dark-mode .modal-content p {
+    color: var(--dark-text-secondary);
+}
+
+.dark-mode .modal-content label {
+    color: var(--dark-text);
+}
+
+.dark-mode .modal-content input,
+.dark-mode .modal-content select {
+    background-color: var(--dark-surface);
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+}
+
+.dark-mode .modal-content input:focus,
+.dark-mode .modal-content select:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px rgba(42, 245, 161, 0.1);
+}
+
+.dark-mode #cancelPreviewBtn {
+    background-color: var(--dark-border);
+    color: var(--dark-text);
+}
+
+.dark-mode #cancelPreviewBtn:hover {
+    background-color: #4a5568;
+}
+
+.dark-mode #confirmTransactionBtn {
+    background-color: var(--accent-green);
+    color: var(--dark-bg);
+}
+
+.dark-mode #confirmTransactionBtn:hover {
+    background-color: #1dd882;
+}
