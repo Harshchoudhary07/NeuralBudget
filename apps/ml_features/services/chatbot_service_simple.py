@@ -1,12 +1,12 @@
 """
-Simplified chatbot service using direct Gemini API (no langchain/FAISS)
-This version is optimized for free hosting with minimal dependencies.
+Ultra-minimal chatbot using Gemini REST API (no SDK dependencies)
+Optimized for free hosting with absolute minimal dependencies.
 """
 import os
 import logging
-from datetime import datetime
+import json
 from dotenv import load_dotenv
-import google.generativeai as genai
+import requests
 
 # Load environment
 load_dotenv()
@@ -14,13 +14,43 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configure Gemini
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+
+def call_gemini_api(prompt: str) -> str:
+    """Call Gemini API directly using REST"""
+    try:
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }],
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 512
+            }
+        }
+        
+        url = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        return result['candidates'][0]['content']['parts'][0]['text']
+        
+    except Exception as e:
+        logger.error(f"Gemini API error: {e}")
+        raise
 
 def get_chatbot_response(user_id: str, message: str) -> str:
     """
-    Simple chatbot using Gemini without RAG.
-    For free hosting - no vector store, just direct LLM calls.
+    Simple chatbot using Gemini REST API.
+    For free hosting - no vector store, just direct API calls.
     """
     try:
         # Import here to avoid circular imports
@@ -67,11 +97,9 @@ Instructions:
 
 Answer:"""
         
-        # Call Gemini
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        
-        return response.text.strip()
+        # Call Gemini REST API
+        response_text = call_gemini_api(prompt)
+        return response_text.strip()
         
     except Exception as e:
         logger.error(f"Error in chatbot: {e}")
